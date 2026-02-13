@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Prototype Agent — 從需求到原型的 AI 助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .step-card { transition: all 0.3s ease; }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+    .tab-active { border-bottom: 3px solid #6366f1; color: #6366f1; font-weight: 600; }
+    .chat-bubble { max-width: 80%; }
+    .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+    .glass { backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- ===== Navbar ===== -->
+  <nav class="fixed top-0 w-full z-50 glass border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="text-xl font-bold text-indigo-600">ProtoAI</span>
+        <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full ml-1">Beta</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8 text-sm text-gray-600">
+        <a href="#features" class="hover:text-indigo-600 transition-colors">功能</a>
+        <a href="#flow" class="hover:text-indigo-600 transition-colors">流程</a>
+        <a href="#demo" class="hover:text-indigo-600 transition-colors">體驗</a>
+        <a href="#pricing" class="hover:text-indigo-600 transition-colors">方案</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="alert('功能邏輯：開啟登入彈窗，支援 Email / Google / SSO 三種登入方式。登入後導向個人工作區。')" class="text-sm text-gray-600 hover:text-indigo-600 transition-colors">登入</button>
+        <button onclick="alert('功能邏輯：開啟註冊流程。\n步驟 1：輸入 Email\n步驟 2：設定密碼\n步驟 3：選擇角色（PM / 設計師 / 工程師）\n步驟 4：進入引導式教學')" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">免費開始</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Hero Section ===== -->
+  <section class="pt-28 pb-20 px-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight mb-6">
+        用自然語言，<br><span class="text-indigo-600">30 分鐘從需求到原型</span>
+      </h1>
+      <p class="text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
+        告訴 AI 你想做什麼，它會幫你釐清需求、生成流程圖、產出可互動的原型。<br>不需要設計工具，不需要等待排程。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button onclick="document.getElementById('demo').scrollIntoView()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl">
+          立即體驗
+        </button>
+        <button onclick="alert('功能邏輯：播放 90 秒產品介紹影片。\n內容包含：\n1. PM 輸入需求的畫面\n2. AI 提問釐清的對話過程\n3. 自動生成 User Flow\n4. 產出可互動原型\n5. 分享給利害關係人')" class="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-xl text-lg font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          觀看介紹
+        </button>
+      </div>
+      <p class="mt-4 text-sm text-gray-400">免費版每月可生成 3 個原型，無需綁定信用卡</p>
+    </div>
+  </section>
+
+  <!-- ===== Stats Bar ===== -->
+  <section class="bg-white border-y border-gray-100 py-8">
+    <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center px-4">
+      <div>
+        <div class="text-3xl font-bold text-indigo-600">< 30 min</div>
+        <div class="text-sm text-gray-500 mt-1">需求到原型的時間</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-indigo-600">85%</div>
+        <div class="text-sm text-gray-500 mt-1">PM 獨立完成率</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-indigo-600">3,200+</div>
+        <div class="text-sm text-gray-500 mt-1">已生成的原型數</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-indigo-600">4.6/5</div>
+        <div class="text-sm text-gray-500 mt-1">使用者滿意度</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features (R-01 ~ R-08) ===== -->
+  <section id="features" class="py-20 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl font-bold text-gray-900">核心功能</h2>
+        <p class="text-gray-500 mt-3">涵蓋從需求輸入到原型分享的完整流程</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- R-01 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-01 自然語言需求輸入\n\n功能邏輯：\n- 提供文字輸入區，支援中文/英文\n- 可貼上現有文件、會議紀錄\n- 支援語音輸入轉文字\n- AI 即時解析並標記關鍵實體（用戶角色、功能、流程）')">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">自然語言輸入</h3>
+          <p class="text-sm text-gray-500">用你習慣的方式描述需求，AI 自動解析與結構化</p>
+        </div>
+        <!-- R-02 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-02 AI 引導式需求釐清\n\n功能邏輯：\n- AI 分析需求後，自動生成 3-5 個釐清問題\n- 問題涵蓋：目標用戶、核心流程、邊界條件、例外處理\n- 以對話形式逐步引導\n- 每個問題附帶建議選項，PM 可選擇或自訂回答\n- 完成後自動更新需求文件')">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">AI 智慧釐清</h3>
+          <p class="text-sm text-gray-500">自動發現需求盲點，引導你補完遺漏的細節</p>
+        </div>
+        <!-- R-03 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-03 結構化需求文件\n\n功能邏輯：\n- 自動產出包含以下區塊的文件：\n  1. 問題陳述\n  2. 使用者故事（含驗收標準）\n  3. 功能清單（P0/P1/P2 分級）\n  4. 流程描述\n  5. 邊界條件與例外處理\n- 支援一鍵匯出為 Markdown / Notion / Confluence')">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">結構化文件</h3>
+          <p class="text-sm text-gray-500">自動產出含使用者故事與驗收標準的完整 PRD</p>
+        </div>
+        <!-- R-04 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-04 User Flow 自動生成\n\n功能邏輯：\n- 根據結構化需求，自動生成視覺化流程圖\n- 支援：\n  - 主流程（Happy Path）\n  - 分支判斷（條件節點）\n  - 例外流程（錯誤處理）\n  - 迴圈（重試機制）\n- 可拖拽調整節點位置\n- 點擊節點可查看對應的使用者故事')">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">User Flow 生成</h3>
+          <p class="text-sm text-gray-500">視覺化流程圖，含分支與例外處理</p>
+        </div>
+        <!-- R-05 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-05 可互動原型生成\n\n功能邏輯：\n- 根據 User Flow 自動生成可點擊的互動原型\n- 支援的互動類型：\n  - 頁面導航與切換\n  - 表單輸入與驗證\n  - 按鈕點擊與狀態變化\n  - Modal / Drawer 彈出\n  - Tab 切換\n  - 下拉選單\n- 自動套用響應式佈局（桌面/平板/手機）')">
+          <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">互動原型</h3>
+          <p class="text-sm text-gray-500">可點擊操作的原型，含頁面切換與表單互動</p>
+        </div>
+        <!-- R-06 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-06 自然語言迭代修改\n\n功能邏輯：\n- 在原型預覽旁提供對話輸入框\n- 支援的修改指令範例：\n  - 「把導覽列改成深色」\n  - 「新增一個搜尋功能在頂部」\n  - 「表單送出後顯示成功訊息」\n  - 「把按鈕文字改成確認送出」\n- 增量更新：只修改相關部分，不重新生成整個原型\n- 修改歷史可追溯')">
+          <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">對話式迭代</h3>
+          <p class="text-sm text-gray-500">用自然語言描述修改，AI 增量更新原型</p>
+        </div>
+        <!-- R-07 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-07 步驟回溯\n\n功能邏輯：\n- 左側時間軸顯示所有步驟版本\n- 點擊任一步驟可預覽該版本狀態\n- 可從任意步驟「分支」出新版本\n- 回溯修改時，後續步驟自動重新生成\n- 支援版本命名與標記（如「利害關係人版」「簡化版」）')">
+          <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">版本回溯</h3>
+          <p class="text-sm text-gray-500">回到任一步驟修改，後續自動更新</p>
+        </div>
+        <!-- R-08 -->
+        <div class="step-card bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer" onclick="alert('R-08 原型預覽與分享\n\n功能邏輯：\n- 一鍵生成分享連結（無需登入即可瀏覽）\n- 分享設定：\n  - 密碼保護（選填）\n  - 到期時間（1天/7天/30天/永久）\n  - 允許留言回饋（開/關）\n- 接收者可在瀏覽器中直接操作原型\n- 支援嵌入 iframe 至 Notion / Confluence')">
+          <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">一鍵分享</h3>
+          <p class="text-sm text-gray-500">生成連結讓利害關係人直接操作原型</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Flow Section ===== -->
+  <section id="flow" class="py-20 px-4 bg-gradient-to-b from-gray-50 to-white">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl font-bold text-gray-900">7 步完成原型</h2>
+        <p class="text-gray-500 mt-3">從模糊想法到可分享的互動原型，全程 AI 協助</p>
+      </div>
+      <div class="relative">
+        <!-- Timeline line -->
+        <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-indigo-200 -translate-x-1/2"></div>
+        <!-- Steps -->
+        <div class="space-y-8 md:space-y-12">
+          <!-- Step 1 -->
+          <div class="md:flex items-center gap-8">
+            <div class="md:w-1/2 md:text-right md:pr-8">
+              <div class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">步驟 1</div>
+              <h3 class="text-lg font-bold text-gray-900">輸入需求</h3>
+              <p class="text-sm text-gray-500 mt-1">用自然語言描述你的功能想法，支援中英文</p>
+            </div>
+            <div class="hidden md:flex w-10 h-10 bg-indigo-600 rounded-full items-center justify-center text-white font-bold text-sm z-10 mx-auto shrink-0">1</div>
+            <div class="md:w-1/2 md:pl-8 mt-3 md:mt-0">
+              <div class="bg-white rounded-xl p-4 border border-gray-200 text-sm text-gray-600 italic">"我想做一個讓用戶可以訂閱每週電子報的功能，要能選擇感興趣的主題..."</div>
+            </div>
+          </div>
+          <!-- Step 2 -->
+          <div class="md:flex items-center gap-8">
+            <div class="md:w-1/2 md:text-right md:pr-8 md:order-1">
+              <div class="bg-white rounded-xl p-4 border border-gray-200 text-sm text-gray-600">
+                <p class="font-medium text-purple-600 mb-2">AI 提問：</p>
+                <ul class="space-y-1 text-left">
+                  <li>- 訂閱後的確認機制是什麼？</li>
+                  <li>- 用戶可以隨時取消訂閱嗎？</li>
+                  <li>- 需要支援哪些主題分類？</li>
+                </ul>
+              </div>
+            </div>
+            <div class="hidden md:flex w-10 h-10 bg-indigo-600 rounded-full items-center justify-center text-white font-bold text-sm z-10 mx-auto shrink-0 md:order-0">2</div>
+            <div class="md:w-1/2 md:pl-8 mt-3 md:mt-0 md:order-2">
+              <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">步驟 2</div>
+              <h3 class="text-lg font-bold text-gray-900">AI 釐清</h3>
+              <p class="text-sm text-gray-500 mt-1">AI 自動發現盲點，引導補完邊界條件</p>
+            </div>
+          </div>
+          <!-- Step 3 -->
+          <div class="md:flex items-center gap-8">
+            <div class="md:w-1/2 md:text-right md:pr-8">
+              <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">步驟 3</div>
+              <h3 class="text-lg font-bold text-gray-900">結構化文件</h3>
+              <p class="text-sm text-gray-500 mt-1">自動產出 PRD，含使用者故事與驗收標準</p>
+            </div>
+            <div class="hidden md:flex w-10 h-10 bg-indigo-600 rounded-full items-center justify-center text-white font-bold text-sm z-10 mx-auto shrink-0">3</div>
+            <div class="md:w-1/2 md:pl-8 mt-3 md:mt-0">
+              <div class="bg-white rounded-xl p-4 border border-gray-200 text-sm text-gray-600">
+                <p class="font-medium text-green-600">US-01：身為一位讀者，我想選擇感興趣的主題...</p>
+                <p class="font-medium text-green-600 mt-1">US-02：身為一位讀者，我想隨時取消訂閱...</p>
+                <p class="text-xs text-gray-400 mt-2">+ 驗收標準、邊界條件、P0/P1 分級</p>
+              </div>
+            </div>
+          </div>
+          <!-- Step 4-7 condensed -->
+          <div class="md:flex items-center gap-8">
+            <div class="md:w-1/2 md:text-right md:pr-8 md:order-1">
+              <div class="bg-white rounded-xl p-4 border border-gray-200 flex items-center justify-center h-24">
+                <div class="flex gap-3 items-center text-sm text-gray-500">
+                  <div class="w-16 h-10 bg-orange-100 rounded flex items-center justify-center text-orange-600 text-xs font-medium">流程圖</div>
+                  <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <div class="w-16 h-10 bg-pink-100 rounded flex items-center justify-center text-pink-600 text-xs font-medium">原型</div>
+                  <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <div class="w-16 h-10 bg-teal-100 rounded flex items-center justify-center text-teal-600 text-xs font-medium">迭代</div>
+                  <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <div class="w-16 h-10 bg-indigo-100 rounded flex items-center justify-center text-indigo-600 text-xs font-medium">分享</div>
+                </div>
+              </div>
+            </div>
+            <div class="hidden md:flex w-10 h-10 bg-indigo-600 rounded-full items-center justify-center text-white font-bold text-xs z-10 mx-auto shrink-0 md:order-0">4-7</div>
+            <div class="md:w-1/2 md:pl-8 mt-3 md:mt-0 md:order-2">
+              <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">步驟 4-7</div>
+              <h3 class="text-lg font-bold text-gray-900">流程圖 → 原型 → 迭代 → 分享</h3>
+              <p class="text-sm text-gray-500 mt-1">AI 自動完成後續步驟，隨時可用自然語言調整</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Interactive Demo ===== -->
+  <section id="demo" class="py-20 px-4 bg-white">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900">互動體驗區</h2>
+        <p class="text-gray-500 mt-3">模擬 AI Prototype Agent 的核心對話流程</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex border-b border-gray-200 mb-8 overflow-x-auto" id="demo-tabs">
+        <button onclick="switchTab('input')" class="px-6 py-3 text-sm whitespace-nowrap tab-active" id="tab-input">需求輸入</button>
+        <button onclick="switchTab('clarify')" class="px-6 py-3 text-sm whitespace-nowrap text-gray-500 hover:text-indigo-600 transition-colors" id="tab-clarify">AI 釐清</button>
+        <button onclick="switchTab('output')" class="px-6 py-3 text-sm whitespace-nowrap text-gray-500 hover:text-indigo-600 transition-colors" id="tab-output">原型預覽</button>
+      </div>
+
+      <!-- Tab: Input -->
+      <div id="panel-input" class="fade-in">
+        <div class="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200">
+          <label class="block text-sm font-medium text-gray-700 mb-3">描述你的功能需求</label>
+          <textarea id="requirement-input" class="w-full h-32 p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm" placeholder="例如：我想做一個讓用戶可以訂閱每週電子報的功能，要能選擇感興趣的主題，也可以隨時取消訂閱..."></textarea>
+          <div class="flex items-center justify-between mt-4">
+            <div class="flex gap-2">
+              <button onclick="document.getElementById('requirement-input').value='我想做一個讓團隊成員可以提交請假申請的功能，主管可以審核，HR 可以查看統計報表。'" class="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-300 transition-colors">範例：請假系統</button>
+              <button onclick="document.getElementById('requirement-input').value='我想做一個電商的商品評價功能，用戶購買後可以留下星等評分和文字評論，其他人可以按「有幫助」。'" class="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-300 transition-colors">範例：商品評價</button>
+            </div>
+            <button onclick="handleSubmitRequirement()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">開始分析</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Clarify -->
+      <div id="panel-clarify" class="hidden fade-in">
+        <div class="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 max-h-96 overflow-y-auto">
+          <div class="space-y-4" id="chat-area">
+            <!-- AI Message -->
+            <div class="flex gap-3">
+              <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div class="chat-bubble bg-white rounded-2xl rounded-tl-sm p-4 border border-gray-200">
+                <p class="text-sm text-gray-700">我已經理解你的需求了！為了產出更完整的原型，想確認幾個問題：</p>
+                <div class="mt-3 space-y-3">
+                  <div class="bg-indigo-50 rounded-lg p-3">
+                    <p class="text-sm font-medium text-indigo-800">Q1：這個功能的目標用戶是誰？</p>
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                      <button onclick="handleClarifyAnswer(this, '內部員工')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">內部員工</button>
+                      <button onclick="handleClarifyAnswer(this, '外部客戶')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">外部客戶</button>
+                      <button onclick="handleClarifyAnswer(this, '兩者皆有')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">兩者皆有</button>
+                    </div>
+                  </div>
+                  <div class="bg-indigo-50 rounded-lg p-3">
+                    <p class="text-sm font-medium text-indigo-800">Q2：需要支援行動裝置嗎？</p>
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                      <button onclick="handleClarifyAnswer(this, '是，行動優先')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">是，行動優先</button>
+                      <button onclick="handleClarifyAnswer(this, '桌面為主')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">桌面為主</button>
+                      <button onclick="handleClarifyAnswer(this, '響應式設計')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">響應式設計</button>
+                    </div>
+                  </div>
+                  <div class="bg-indigo-50 rounded-lg p-3">
+                    <p class="text-sm font-medium text-indigo-800">Q3：操作失敗時要如何處理？</p>
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                      <button onclick="handleClarifyAnswer(this, '顯示錯誤訊息')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">顯示錯誤訊息</button>
+                      <button onclick="handleClarifyAnswer(this, '自動重試')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">自動重試</button>
+                      <button onclick="handleClarifyAnswer(this, '兩者結合')" class="text-xs bg-white border border-indigo-300 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors">兩者結合</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <input type="text" placeholder="輸入自訂回答..." class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <button onclick="alert('功能邏輯：送出自訂回答後，AI 會根據回答更新需求理解，並可能追問更細節的問題。所有對話紀錄都會保存在專案歷史中。')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors">送出</button>
+          </div>
+        </div>
+        <div class="flex justify-end mt-4">
+          <button onclick="switchTab('output')" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2">
+            生成原型
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab: Output -->
+      <div id="panel-output" class="hidden fade-in">
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden">
+          <!-- Toolbar -->
+          <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="flex gap-1.5">
+                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+              </div>
+              <span class="text-xs text-gray-400">原型預覽 — 請假申請系統</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="alert('功能邏輯：切換裝置預覽模式。\n\n目前支援：\n- 桌面 (1440px)\n- 平板 (768px)\n- 手機 (375px)\n\n原型會自動調整佈局以適應不同螢幕尺寸。')" class="text-xs text-gray-500 hover:text-indigo-600 px-2 py-1 rounded transition-colors">📱 裝置切換</button>
+              <button onclick="alert('功能邏輯：生成分享連結。\n\n設定選項：\n- 連結有效期：7 天（可調整）\n- 密碼保護：關閉\n- 允許留言：開啟\n\n連結範例：https://protoai.app/share/abc123\n\n接收者無需登入即可瀏覽與操作原型。')" class="text-xs bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full hover:bg-indigo-200 transition-colors">分享連結</button>
+              <button onclick="alert('功能邏輯：匯出選項。\n\n支援格式：\n1. HTML + Tailwind CSS（單一檔案）\n2. React 元件（含 JSX + CSS Module）\n3. Figma 設計稿（.fig）\n4. PNG 截圖（各頁面）\n\n匯出的程式碼包含完整的互動邏輯與響應式佈局。')" class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full hover:bg-green-200 transition-colors">匯出程式碼</button>
+            </div>
+          </div>
+          <!-- Mock Prototype -->
+          <div class="p-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-w-lg mx-auto">
+              <!-- App Header -->
+              <div class="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
+                <h4 class="font-semibold">請假申請系統</h4>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs opacity-80">王小明</span>
+                  <div class="w-7 h-7 bg-indigo-400 rounded-full flex items-center justify-center text-xs">王</div>
+                </div>
+              </div>
+              <!-- App Content -->
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">請假類型</label>
+                  <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    <option>特休假</option>
+                    <option>病假</option>
+                    <option>事假</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">開始日期</label>
+                    <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">結束日期</label>
+                    <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">請假事由</label>
+                  <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none h-16 focus:ring-2 focus:ring-indigo-500" placeholder="請簡述請假原因..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                  <button onclick="alert('功能邏輯：送出請假申請。\n\n流程：\n1. 前端驗證：檢查必填欄位、日期合理性\n2. 送出至後端 API\n3. 自動通知主管審核\n4. 顯示成功訊息「申請已送出，等待主管審核」\n5. 跳轉至申請列表頁\n\n主管會收到 Email + App 推播通知。')" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">送出申請</button>
+                  <button onclick="alert('功能邏輯：儲存為草稿。\n\n行為：\n- 將目前填寫內容暫存\n- 下次進入頁面自動載入草稿\n- 草稿保留 30 天\n- 不觸發主管通知')" class="px-6 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">存為草稿</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Iteration input -->
+          <div class="border-t border-gray-200 px-6 py-4 bg-white">
+            <div class="flex gap-2">
+              <input type="text" id="iteration-input" placeholder="輸入修改指令，例如「加一個檔案上傳欄位」..." class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <button onclick="handleIteration()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                更新
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pricing ===== -->
+  <section id="pricing" class="py-20 px-4 bg-gray-50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl font-bold text-gray-900">選擇方案</h2>
+        <p class="text-gray-500 mt-3">從免費開始，依需求升級</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Free -->
+        <div class="bg-white rounded-2xl p-8 border border-gray-200 step-card">
+          <h3 class="text-lg font-bold text-gray-900">Free</h3>
+          <div class="mt-4"><span class="text-4xl font-extrabold text-gray-900">$0</span><span class="text-gray-500 text-sm">/月</span></div>
+          <ul class="mt-6 space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 每月 3 個原型</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> AI 需求釐清</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 連結分享</li>
+            <li class="flex items-center gap-2 text-gray-400"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg> 程式碼匯出</li>
+          </ul>
+          <button onclick="alert('功能邏輯：開始免費註冊流程。\n\n只需 Email 即可開始，無需綁定信用卡。\n免費方案包含每月 3 個原型的額度。')" class="w-full mt-8 border-2 border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">免費開始</button>
+        </div>
+        <!-- Pro -->
+        <div class="bg-white rounded-2xl p-8 border-2 border-indigo-600 step-card relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs px-4 py-1 rounded-full">最受歡迎</div>
+          <h3 class="text-lg font-bold text-gray-900">Pro</h3>
+          <div class="mt-4"><span class="text-4xl font-extrabold text-gray-900">$29</span><span class="text-gray-500 text-sm">/月</span></div>
+          <ul class="mt-6 space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 無限原型</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> HTML / React 匯出</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Design System 匯入</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 版本歷史</li>
+          </ul>
+          <button onclick="alert('功能邏輯：開始 Pro 方案訂閱流程。\n\n步驟：\n1. 選擇付款週期（月繳 $29 / 年繳 $24/月）\n2. 輸入信用卡資訊（支援 Visa/Master/JCB）\n3. 確認訂閱\n4. 立即解鎖所有 Pro 功能\n\n提供 14 天無條件退款保證。')" class="w-full mt-8 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm">升級 Pro</button>
+        </div>
+        <!-- Team -->
+        <div class="bg-white rounded-2xl p-8 border border-gray-200 step-card">
+          <h3 class="text-lg font-bold text-gray-900">Team</h3>
+          <div class="mt-4"><span class="text-4xl font-extrabold text-gray-900">$79</span><span class="text-gray-500 text-sm">/月/人</span></div>
+          <ul class="mt-6 space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Pro 所有功能</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 團隊共享空間</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> SSO 登入</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 優先客服</li>
+          </ul>
+          <button onclick="alert('功能邏輯：開啟 Team 方案聯繫表單。\n\n團隊方案需與業務代表確認：\n- 團隊人數\n- 是否需要自建部署\n- SSO 整合需求\n- SLA 等級\n\n提交後 24 小時內會有專人聯繫。')" class="w-full mt-8 border-2 border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">聯繫我們</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-gray-900 text-gray-400 py-12 px-4">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <span class="text-lg font-bold text-white">ProtoAI</span>
+        </div>
+        <p class="text-sm">從需求到原型的 AI 助手<br>讓每位 PM 都能快速驗證想法</p>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3 text-sm">產品</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#features" class="hover:text-white transition-colors">功能介紹</a></li>
+          <li><a href="#pricing" class="hover:text-white transition-colors">定價方案</a></li>
+          <li><a href="#" onclick="alert('功能邏輯：開啟產品更新日誌頁面，按時間排序顯示每次更新的內容、新增功能與修復項目。')" class="hover:text-white transition-colors">更新日誌</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3 text-sm">資源</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" onclick="alert('功能邏輯：開啟使用者文件中心，包含快速入門指南、功能教學、常見問題、API 文件。')" class="hover:text-white transition-colors">使用文件</a></li>
+          <li><a href="#" onclick="alert('功能邏輯：開啟部落格，內容包含產品更新、PM 工作流程最佳實踐、用戶案例分享。')" class="hover:text-white transition-colors">部落格</a></li>
+          <li><a href="#" onclick="alert('功能邏輯：開啟 API 文件頁面，供開發者透過 API 整合原型生成功能至自有平台。')" class="hover:text-white transition-colors">API 文件</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3 text-sm">公司</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" onclick="alert('功能邏輯：開啟關於我們頁面，介紹團隊背景、公司願景與使命。')" class="hover:text-white transition-colors">關於我們</a></li>
+          <li><a href="#" onclick="alert('功能邏輯：開啟隱私政策頁面。重點：用戶數據不用於模型訓練、支援 GDPR、資料加密儲存。')" class="hover:text-white transition-colors">隱私政策</a></li>
+          <li><a href="#" onclick="alert('功能邏輯：開啟服務條款頁面。')" class="hover:text-white transition-colors">服務條款</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-gray-800 text-sm text-center">
+      &copy; 2026 ProtoAI. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- ===== JavaScript ===== -->
+  <script>
+    // Tab switching
+    function switchTab(tab) {
+      ['input', 'clarify', 'output'].forEach(t => {
+        document.getElementById('panel-' + t).classList.add('hidden');
+        document.getElementById('tab-' + t).classList.remove('tab-active');
+        document.getElementById('tab-' + t).classList.add('text-gray-500');
+      });
+      document.getElementById('panel-' + tab).classList.remove('hidden');
+      document.getElementById('panel-' + tab).classList.add('fade-in');
+      document.getElementById('tab-' + tab).classList.add('tab-active');
+      document.getElementById('tab-' + tab).classList.remove('text-gray-500');
+    }
+
+    // Submit requirement
+    function handleSubmitRequirement() {
+      const input = document.getElementById('requirement-input').value.trim();
+      if (!input) {
+        alert('請先輸入你的功能需求描述，或點擊上方的範例快速填入。');
+        return;
+      }
+      alert('功能邏輯：AI 正在分析你的需求...\n\n處理步驟：\n1. NLP 解析需求文字\n2. 識別關鍵實體（用戶角色、功能、流程）\n3. 比對已知模式，生成釐清問題\n4. 準備進入對話式釐清階段\n\n你的需求：\n' + input);
+      switchTab('clarify');
+    }
+
+    // Clarify answer
+    function handleClarifyAnswer(btn, answer) {
+      const parent = btn.parentElement;
+      parent.innerHTML = '<span class="text-xs text-indigo-600 font-medium bg-indigo-100 px-3 py-1.5 rounded-full inline-block">已選擇：' + answer + '</span>';
+    }
+
+    // Iteration
+    function handleIteration() {
+      const input = document.getElementById('iteration-input').value.trim();
+      if (!input) {
+        alert('請輸入你想修改的內容，例如：\n- 「加一個檔案上傳欄位」\n- 「把按鈕顏色改成綠色」\n- 「新增一個代理人欄位」');
+        return;
+      }
+      alert('功能邏輯：AI 收到修改指令。\n\n指令：「' + input + '」\n\n處理方式：\n1. 解析修改意圖\n2. 定位需修改的元件\n3. 增量更新原型（不重新生成整頁）\n4. 同步更新需求文件與 User Flow\n5. 在版本歷史中記錄此次修改');
+      document.getElementById('iteration-input').value = '';
+    }
+  </script>
+
+</body>
+</html>
